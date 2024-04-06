@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Code Agency Cloud MOTD" > /etc/motd
+cat /home/codeagency/motd.txt > /etc/motd
 
 # Create new user "codeagency" with SSH key
 useradd -m -s /bin/bash codeagency
