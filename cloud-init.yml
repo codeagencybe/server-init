@@ -12,7 +12,7 @@ packages:
 
 runcmd:
 - 'mkdir -p /home/codeagency/' 
-- 'wget -O /home/codeagency/setup_server.sh https://raw.githubusercontent.com/codeagencybe/server-init/setup_server.sh'
+- 'wget -O /home/codeagency/setup_server.sh https://raw.githubusercontent.com/codeagencybe/server-init/main/setup_server.sh'
 - 'bash /home/codeagency/setup_server.sh'
 
 
