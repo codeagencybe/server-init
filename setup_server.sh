@@ -1,7 +1,4 @@
 #!/bin/bash
-
-cat /home/codeagency/motd.txt > /etc/motd
-
 # Create new user "codeagency" with SSH key
 useradd -m -s /bin/bash codeagency
 mkdir -p /home/codeagency/.ssh
