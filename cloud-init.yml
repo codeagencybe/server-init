@@ -1,0 +1,19 @@
+#cloud-config
+
+bootcmd:
+- [ sh, -c, echo "========= Loading Code Agency Cloud =========" ]
+
+packages:
+- apt-transport-https
+- ca-certificates
+- curl
+- gnupg-agent
+- software-properties-common
+
+runcmd:
+- 'mkdir -p /home/codeagency/' 
+- 'wget -O /home/codeagency/setup_server.sh https://raw.githubusercontent.com/codeagencybe/server-init/setup_server.sh'
+- 'bash /home/codeagency/setup_server.sh'
+
+
+
