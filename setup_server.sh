@@ -20,7 +20,7 @@ apt-get upgrade -y
 apt-get install -y unattended-upgrades
 dpkg-reconfigure --priority=low unattended-upgrades
 
-echo "Code Agency Cloud is containerizing your server... Please wait a moment." > /etc/motd
+echo "Code Agency Cloud is containerizing your server... Please wait a moment."
 # Install Docker and Docker Compose
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
