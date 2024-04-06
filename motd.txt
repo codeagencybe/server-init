@@ -1,0 +1,15 @@
+   _____          _
+  / ____|        | |          /\
+ | |     ___   __| | ___     /  \   __ _  ___ _ __   ___ _   _
+ | |    / _ \ / _` |/ _ \   / /\ \ / _` |/ _ \ '_ \ / __| | | |
+ | |___| (_) | (_| |  __/  / ____ \ (_| |  __/ | | | (__| |_| |
+  \_____\___/ \__,_|\___| /_/    \_\__, |\___|_| |_|\___|\__, |
+                                    __/ |                 __/ |
+                                   |___/                 |___/
+
+
+https://codeagency.be - https://codeagency.cloud
+Your expert partner in software development, cloud hosting & Kubernetes.
+
+This server is configured by Code Agency. If you have any questions or need help, 
+please contact us at support@codeagency.be
