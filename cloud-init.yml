@@ -9,6 +9,8 @@ packages:
 - curl
 - gnupg-agent
 - software-properties-common
+package_update: true
+package_upgrade: true
 
 runcmd:
 - 'mkdir -p /home/codeagency/' 
