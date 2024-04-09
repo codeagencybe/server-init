@@ -57,5 +57,23 @@ package_upgrade: true
   - sed -i -e '/^\(#\|\)X11Forwarding/s/^.*$/X11Forwarding no/' /etc/ssh/sshd_config
   - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
   - sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
-  - sed -i '$a AllowUsers holu' /etc/ssh/sshd_config
+  - sed -i '$a AllowUsers codeagency' /etc/ssh/sshd_config
+```
+
+## Generate a new SSH key
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@example.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+```
+
+## Github deploy key
+
+Create a new deploy key in the Github repository settings with the public key generated above.
+**_Leave write access unchecked._**
+
+```bash
+cat ~/.ssh/id_ed25519.pub
 ```
