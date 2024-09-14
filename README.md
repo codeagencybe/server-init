@@ -1,79 +1,77 @@
-# commands
+# Server Init
 
-This method will reboot the system as if cloud-init never ran. This command does not remove all cloud-init artefacts from previous runs of cloud-init, but it will clean enough artefacts to allow cloud-init to think that it hasn’t run yet. It will then re-run after a reboot.
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-```bash
-cloud-init clean --logs --reboot
+- [Server Init](#server-init)
+  - [Usage](#usage)
+  - [Example](#example)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+This repo holds the initial cloud-init configuration to run Hetzner Cloud servers.
+
+## Usage
+
+To use the configuration, add the following line to your `user_data`:
+
+```yaml
+#include
+https://raw.githubusercontent.com/codeagencybe/server-init/main/cloud-init.yml
 ```
 
-https://cloudinit.readthedocs.io/en/latest/howto/rerun_cloud_init.html
+## Example
 
-## Create user
+To get a minimal working example, here's the TF file to create one server with
+public IP to access and verify the configuration:
 
-After the initial comment, let us start by creating a new admin user with sudo privileges and pre-configured SSH key.
+```terraform
+terraform {
+  required_providers {
+    hcloud = {
+      source  = "hetznercloud/hcloud"
+      version = "~> 1.48"
+    }
+  }
+}
 
-```bash
-users:
-  - name: codeagency
-    groups: users, admin, docker
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-    ssh_authorized_keys:
-      - <public_ssh_key>
+resource "tls_private_key" "this" {
+  algorithm = "ED25519"
+}
+
+resource "hcloud_ssh_key" "this" {
+  name       = "codeagency"
+  public_key = tls_private_key.this.public_key_openssh
+}
+
+resource "hcloud_server" "this" {
+  name        = "codeagency"
+  image       = "ubuntu-24.04"
+  server_type = "cx11"
+
+  ssh_keys = [
+    hcloud_ssh_key.this.id,
+  ]
+
+  user_data = <<-EOF
+    #include
+    https://raw.githubusercontent.com/codeagencybe/server-init/main/cloud-init.yml
+  EOF
+
+  public_net {
+    ipv4_enabled = true
+    ipv6_enabled = true
+  }
+}
+
+output "public_ip" {
+  value     = hcloud_server.this.ipv4_address
+  sensitive = true
+}
+
+output "ssh_private_key" {
+  value     = tls_private_key.this.private_key_openssh
+  sensitive = true
+}
 ```
 
-## Update packages
-
-```bash
-packages:
-  - fail2ban
-  - ufw
-package_update: true
-package_upgrade: true
-```
-
-## Configure fail2ban
-
-```bash
-  - printf "[sshd]\nenabled = true\nbanaction = iptables-multiport" > /etc/fail2ban/jail.local
-  - systemctl enable fail2ban
-```
-
-## Harden SSH
-
-- Deactivate the root login
-- Enable user for SSH
-- Deactivate password authentication
-- Automatic disconnection in case of incorrect login
-- Deactivate unused functions
-
-```bash
-  - sed -i -e '/^\(#\|\)PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)PasswordAuthentication/s/^.*$/PasswordAuthentication no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)KbdInteractiveAuthentication/s/^.*$/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)ChallengeResponseAuthentication/s/^.*$/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)MaxAuthTries/s/^.*$/MaxAuthTries 2/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)AllowTcpForwarding/s/^.*$/AllowTcpForwarding no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)X11Forwarding/s/^.*$/X11Forwarding no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
-  - sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
-  - sed -i '$a AllowUsers codeagency' /etc/ssh/sshd_config
-```
-
-## Generate a new SSH key
-
-```bash
-ssh-keygen -t ed25519 -C "your_email@example.com"
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
-
-```
-
-## Github deploy key
-
-Create a new deploy key in the Github repository settings with the public key generated above.
-**_Leave write access unchecked._**
-
-```bash
-cat ~/.ssh/id_ed25519.pub
-```
