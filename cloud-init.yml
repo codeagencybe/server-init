@@ -1,20 +1,49 @@
 #cloud-config
-
 bootcmd:
-- [ sh, -c, echo "========= Loading Code Agency Cloud =========" ]
+  - [sh, -c, echo "========= Loading Code Agency Cloud ========="]
 
-packages:
-- apt-transport-https
-- ca-certificates
-- curl
-- gnupg-agent
-- software-properties-common
 package_update: true
 package_upgrade: true
+packages:
+  - apt-transport-https
+  - build-essential
+  - ca-certificates
+  - ctop
+  - curl
+  - curl
+  - git
+  - gnupg-agent
+  - software-properties-common
+  - unattended-upgrades
+  - wget
 
 runcmd:
-- 'mkdir -p /home/codeagency/' 
-- 'wget -O /home/codeagency/setup_server.sh https://raw.githubusercontent.com/codeagencybe/server-init/main/setup_server.sh'
-- 'bash /home/codeagency/setup_server.sh'
-- 'wget -O /etc/motd https://raw.githubusercontent.com/codeagencybe/server-init/main/motd.txt'
-- reboot
+  - curl -sSfLo /etc/motd https://raw.githubusercontent.com/codeagencybe/server-init/main/motd.txt
+  - echo "Code Agency Cloud is containerizing your server... Please wait a moment."
+  - curl -fsSL https://get.docker.com | sh
+  - |
+    useradd -m -s /bin/bash codeagency -G sudo,docker
+    echo 'ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/codeagency
+    mkdir -p /home/codeagency/.ssh
+    cp /root/.ssh/authorized_keys /home/codeagency/.ssh/authorized_keys
+    chown -R codeagency:codeagency /home/codeagency/
+  - systemctl enable docker
+  - echo "Code Agency Cloud is installing Dust on your server... Please wait a moment."
+  - sudo -u codeagency bash -c "cargo install du-dust -y"
+  - echo "Your server is now ready. Welcome aboard Code Agency Cloud! Enjoy your new fast server."
+  - dpkg-reconfigure --priority=low unattended-upgrades
+  - echo Code Agency is configuring the SSH daemon
+  - sed -i -e '/^\(#\|\)PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)PasswordAuthentication/s/^.*$/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)KbdInteractiveAuthentication/s/^.*$/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)ChallengeResponseAuthentication/s/^.*$/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)MaxAuthTries/s/^.*$/MaxAuthTries 2/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)X11Forwarding/s/^.*$/X11Forwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
+  - sed -i '$a AllowUsers codeagency' /etc/ssh/sshd_config
+
+power_state:
+  mode: reboot
+  message: "Code Agency Cloud setup completed successfully. Rebooting your server now."
+  delay: now
