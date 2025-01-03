@@ -23,7 +23,7 @@ runcmd:
   - curl -fsSL https://get.docker.com | sh
   - |
     useradd -m -s /bin/bash codeagency -G sudo,docker
-    echo 'ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/codeagency
+    echo 'codeagency ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/codeagency
     mkdir -p /home/codeagency/.ssh
     cp /root/.ssh/authorized_keys /home/codeagency/.ssh/authorized_keys
     chown -R codeagency:codeagency /home/codeagency/
