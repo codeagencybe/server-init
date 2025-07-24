@@ -28,8 +28,21 @@ runcmd:
     cp /root/.ssh/authorized_keys /home/codeagency/.ssh/authorized_keys
     chown -R codeagency:codeagency /home/codeagency/
   - systemctl enable docker
+  - echo "Code Agency Cloud is installing Homebrew on your server... Please wait a moment."
+  - |
+    sudo -u codeagency bash -c '
+      # Install Homebrew
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" < /dev/null
+      
+      # Add Homebrew to PATH for the codeagency user
+      echo >> /home/codeagency/.bashrc
+      echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/codeagency/.bashrc
+      
+      # Ensure environment is sourced
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    '
   - echo "Code Agency Cloud is installing Dust on your server... Please wait a moment."
-  - sudo -u codeagency bash -c "cargo install du-dust -y"
+  - sudo -u codeagency bash -c "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\" && brew install dust"
   - echo "Your server is now ready. Welcome aboard Code Agency Cloud! Enjoy your new fast server."
   - dpkg-reconfigure --priority=low unattended-upgrades
   - echo Code Agency is configuring the SSH daemon
